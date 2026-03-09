@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MetaEarth3D: Spatially Scalable Generative Modeling</title>
+
+  <link rel="icon" type="image/x-icon" href="static/images/MetaEarth3D.ico">
+  <link rel="apple-touch-icon" href="static/images/MetaEarth3Ds.ico">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Light Tech Theme Variables (淡蓝/白色底调) */
+    :root {
+      --bg-color: #f4f9ff; /* 淡蓝色背景 */
+      --card-bg: rgba(255, 255, 255, 0.85); /* 半透明白卡片 */
+      --border-color: rgba(0, 118, 255, 0.15);
+      --border-hover: rgba(0, 118, 255, 0.4);
+      --text-main: #1f2937; /* 深灰主文字 */
+      --text-muted: #6b7280; /* 中灰辅助文字 */
+      --accent-light: #0070f3; /* 亮蓝色强调 */
+      --accent-dark: #0051b3; /* 深蓝色强调 */
+      --glow-shadow: 0 10px 30px rgba(0, 118, 255, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient Tech Background (浅色网格 + 柔光) */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background:
+        radial-gradient(circle at 15% 50%, rgba(0, 118, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 85% 30%, rgba(0, 200, 255, 0.05) 0%, transparent 50%);
+      z-index: -1;
+      pointer-events: none;
+    }
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background-image:
+        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    a {
+      color: var(--accent-light);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    a:hover {
+      color: var(--accent-dark);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Typography */
+    h1, h2, h3 {
+      font-weight: 700;
+      line-height: 1.2;
+      color: #111827;
+    }
+
+    p {
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: #374151;
+    }
+
+    /* 删除了原有的 JetBrains Mono 设定，保持普通字体统一 */
+    .mono {
+      /* 仅保留类名以防HTML需要，但不改变字体 */
+    }
+
+    /* Gradient Text */
+    .text-gradient {
+      background: linear-gradient(90deg, var(--accent-light) 0%, var(--accent-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      text-shadow: 0 0 30px rgba(0, 118, 255, 0.15);
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 7rem 0 4rem 0;
+      position: relative;
+    }
+
+    .hero h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .authors {
+      font-size: 1.15rem;
+      margin-bottom: 1rem;
+    }
+
+    .authors a {
+      color: var(--text-main);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+      padding-bottom: 2px;
+    }
+
+    .authors a:hover {
+      color: var(--accent-light);
+      border-color: var(--accent-light);
+    }
+
+    .affiliations {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .affiliations sup {
+      color: var(--accent-light);
+    }
+
+    /* Default Cyberpunk/HUD Style Cards (浅色版) */
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 3.5rem 4rem;
+      margin-bottom: 3.5rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Left accent line (HUD effect) */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 3px; height: 100%;
+      background: linear-gradient(to bottom, transparent, var(--accent-light), transparent);
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--glow-shadow);
+      transform: translateY(-2px);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1.8rem;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* 从中间向两边渐变的横线 */
+    .card h2::after {
+      content: '';
+      display: block;
+      width: 160px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--accent-light) 50%, transparent 100%);
+      margin: 15px auto 0;
+      box-shadow: 0 0 10px rgba(0, 118, 255, 0.2);
+    }
+
+    /* --- SPECIAL: Clean Intro Box (故事开篇风格) --- */
+    .intro-card {
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 4rem 4rem;
+      margin-bottom: 4rem;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+      position: relative;
+    }
+
+    /* 顶部隐约的发光线 */
+    .intro-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 10%;
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 118, 255, 0.5), transparent);
+      box-shadow: 0 0 10px var(--accent-light);
+    }
+
+    .intro-card p {
+      font-size: 1.15rem;
+      line-height: 1.9;
+      color: #374151;
+      margin: 0;
+      text-align: justify;
+    }
+
+    /* 段落内的高亮语句 (保留此类以防以后用到，但去除了HTML中的应用) */
+    .highlight-sentence {
+      color: #111827;
+      font-weight: 600;
+      background: linear-gradient(120deg, rgba(0, 118, 255, 0.1) 0%, rgba(0, 118, 255, 0) 100%);
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    /* Media Containers */
+    .media-wrapper {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      margin: 2.5rem 0;
+      background: #f8fafc;
+      position: relative;
+    }
+
+    img, video {
+      width: 100%;
+      display: block;
+      height: auto;
+    }
+
+    /* --- Matrix Grid for 3 Videos (Unbounded Scenes) --- */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin: 2.5rem 0;
+    }
+
+    /* --- Matrix Grid for 2 Videos (Multi-level & Navigation Scenes) --- */
+    .video-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin: 2.5rem 0;
+    }
+
+    /* 共用的视频样式 */
+    .video-grid video, .video-grid-2 video {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      background: #f8fafc;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .video-grid video:hover, .video-grid-2 video:hover {
+      transform: scale(1.03);
+      border-color: var(--accent-light);
+      box-shadow: 0 10px 25px rgba(0, 118, 255, 0.15);
+      z-index: 2;
+    }
+
+    .caption {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    /* BibTeX Terminal Style (浅色版) */
+    pre {
+      background-color: #f1f5f9;
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      color: #0f172a;
+      font-size: 0.95rem;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.02);
+    }
+
+    .bibtex-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--accent-light);
+      color: var(--accent-light);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-light);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(0, 118, 255, 0.3);
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem 0;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* 移动端响应式调整 */
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.2rem; }
+      .card { padding: 2rem 1.5rem; }
+      .intro-card { padding: 2.5rem 1.5rem; }
+      .intro-card p { font-size: 1rem; }
+      /* 手机端统统折叠为单列上下排列 */
+      .video-grid, .video-grid-2 {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="container">
+      <h1><span class="text-gradient">MetaEarth3D</span><br>Spatially Scalable Generative Modeling for<br>World-scale 3D Scenes</h1>
+
+      <div class="authors">
+        <a href="FIRST AUTHOR PERSONAL LINK" target="_blank">Jinqi Cao</a><sup>#</sup>,
+        <a href="https://scholar.google.com.hk/citations?user=qgldqJAAAAAJ" target="_blank">Zhiping Yu</a><sup>#</sup>,
+        <a href="https://scholar.google.com.hk/citations?user=1vEiE3wAAAAJ" target="_blank">Baihong Lin</a>,
+        <a href="https://scholar.google.com.hk/citations?user=jBnA45cAAAAJ" target="_blank">Chenyang Liu</a>,
+        <a href="https://scholar.google.com.hk/citations?user=kNhFWQIAAAAJ" target="_blank">Zhenwei Shi</a><sup>*</sup>,
+        <a href="https://scholar.google.com.hk/citations?user=DzwoyZsAAAAJ" target="_blank">Zhengxia Zou</a><sup>*</sup>
+      </div>
+
+      <div class="affiliations mono">
+        Beihang University | 2026<br><br>
+        <span style="font-size: 0.8rem; opacity: 0.7;"><sup>#</sup>Equal Contribution &nbsp;//&nbsp; <sup>*</sup>Co-corresponding Author</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+
+    <div class="card" style="padding: 1rem; background: transparent; border: none; box-shadow: none;">
+      <div class="media-wrapper" style="margin-top: 0; box-shadow: var(--glow-shadow);">
+        <img src="static/images/teaser.jpg" alt="MetaEarth3D Teaser Visualization">
+      </div>
+      <p class="caption" style="max-width: 90%; margin: 1rem auto 0 auto;">
+        MetaEarth3D extends the spatial boundaries of generative foundation models, enabling the generation of multi-level, unbounded, and diverse 3D scenes with explicit mesh representations at world scale.
+      </p>
+    </div>
+
+    <div class="intro-card">
+      <p>
+        Recent generative AI models have achieved remarkable breakthroughs in language and visual understanding. However, although these models can generate realistic visual content, their spatial scale remains confined to bounded environments, preventing them from capturing how geographic environments evolve across thousands of kilometers or from modeling the spatial structure of the large-scale physical world. This limitation poses a critical challenge for ultra-wide-area spatial intelligence in Earth observation and simulation, revealing a deeper gap in generative AI: progress has relied primarily on scaling model parameters and training data, while overlooking spatial scale as a core dimension of intelligence. Here, motivated by this missing dimension, we investigate spatial scale as a new scaling axis in foundation models and present <span class="text-gradient" style="font-weight: 700;">MetaEarth3D</span>, the first generative foundation model capable of spatially consistent generation at planetary scale. Taking optical Earth observation simulation as a testbed, MetaEarth3D enables the generation of multi-level, unbounded, and diverse 3D scenes spanning large-scale terrains, medium-scale cities, and fine-grained street blocks. Built upon 10 million globally distributed real-world training images, MetaEarth3D demonstrates both strong visual realism and geospatial statistical realism. Beyond generation, MetaEarth3D serves as a generative data engine for diverse virtual environments in ultra-wide spatial intelligence. We argue that this study may help empower next-generation spatial intelligence for Earth observation.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Background</h2>
+      <p>
+        Despite the substantial progress achieved in scaling generative foundation models in terms of parameters, data, and modality diversity, far less attention has been paid to scaling them along the spatial dimension. Existing 3D generative models and so-called world models largely remain confined to object-level, indoor-level, or localized street-view scenes.
+      </p>
+      <div class="media-wrapper">
+        <img src="static/images/background.jpg" alt="Background overview">
+      </div>
+      <p class="caption" style="max-width: 90%; margin: 1rem auto 0 auto;">Chronological evolution of generative models across spatial scales. Circle size and color denote model scale (parameters/data) and generation modality.</p>
+    </div>
+
+    <div class="card">
+      <h2>Method Overview</h2>
+      <p>
+        We develop MetaEarth3D, which reformulates ultra-wide 3D scene generation as a progressive transition of probability distributions through coupled scale and dimensional space, effectively transforming intractable 3D generation tasks into a set of tractable 2D generative learning tasks.
+      </p>
+      <div class="media-wrapper">
+        <img src="static/images/method.jpg" alt="Method overview">
+      </div>
+      <p class="caption" style="max-width: 90%; margin: 1rem auto 0 auto;">The overall progressive probabilistic generative framework for ultra-wide 3D scene generation. The generation process is divided into scale space transition and dimensional space lifting.</p>
+    </div>
+
+    <div class="card">
+      <h2>10M GLOBAL-SCALE TRAINING DATA</h2>
+      <p>
+        To enable global-scale and multi-level 3D scene generation, we constructed a large-scale dataset comprising approximately 10 million images. The dataset consists of three complementary components: multi-scale satellite imagery, geo-aligned elevation maps, and multi-view urban imagery.
+      </p>
+      <div class="media-wrapper">
+        <img src="static/images/data.jpg" alt="dataset distribution">
+      </div>
+      <p class="caption">The global distribution of dataset supporting MetaEarth3D training and testing.</p>
+    </div>
+
+    <div class="card">
+      <h2>World-scale 3D Scenes Generation</h2>
+      <p>
+        Conditioned on flexible multi-modal inputs, MetaEarth3D generates realistic scenes across the globe with distinct regional characteristics, including mountains, deserts, snowfields, coastlines, and urban areas.
+      </p>
+      <div class="media-wrapper">
+        <video autoplay controls muted loop playsinline>
+          <source src="static/videos/demo1_compressed.mp4" type="video/mp4">
+        </video>
+      </div>
+      <p>
+        Comprehensive evaluations by both domain experts and Multimodal Large Language Models (MLLMs) demonstrate that MetaEarth3D significantly outperforms existing baselines in visual realism, diversity, and view consistency. Our MetaEarth3D maintains high structural fidelity while successfully scaling 3D scene generation to unprecedented spatial extents.
+      </p>
+      <div class="media-wrapper">
+        <img src="static/images/user study.jpg" alt="User study evaluations">
+      </div>
+      <p class="caption" style="text-align: justify; max-width: 90%; margin: 1rem auto 0 auto; line-height: 1.6;">
+        The chart on the left details human expert evaluation results, where domain experts assessed generation quality across five dimensions: perceptual quality, 3D realism, diversity, view consistency, and spatial scale. All scores are on a 5-point scale, with 5 indicating the best. The chart on the right presents the corresponding evaluation results assessed by Multimodal Large Language Models (MLLMs).</p>
+    </div>
+
+    <div class="card">
+      <h2>Multi-level and Statistically Realistic Generation</h2>
+      <p>
+        MetaEarth3D enables the creation of unified scenes across multiple observational levels within a single framework. It generates cross-scale scenes that maintain semantic coherence, encompassing macro-scale terrains down to fine-grained street blocks.
+      </p>
+
+      <div class="video-grid-2">
+        <video autoplay controls muted loop playsinline preload="metadata">
+          <source src="static/videos/demo2_mountain_compressed.mp4" type="video/mp4">
+        </video>
+        <video autoplay controls muted loop playsinline preload="metadata">
+          <source src="static/videos/demo2_city_compressed.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <p class="caption">Multi-level generation: from macro-scale terrains (left) to fine-grained city blocks (right).</p>
+
+      <p>
+        Beyond visual fidelity, MetaEarth3D successfully captures the intrinsic correlation between semantic categories and physical geometry, statistically mirroring real-world topographies across the globe.
+      </p>
+
+      <div class="media-wrapper">
+        <img src="static/images/statistics.jpg" alt="Statistical comparison of generated versus real height maps">
+      </div>
+      <p class="caption" style="text-align: justify; max-width: 90%; margin: 1rem auto 0 auto; line-height: 1.6;">
+        Statistical comparison of generated versus real height maps across diverse continents and scenes. Subpanels (arranged left to right, top to bottom) display terrain elevations for Africa, Asia, Europe, North America, South America, Oceania, followed by height distributions of artificial structures in Asia, Europe and North America. The high degree of overlap (gray regions) indicates the model's capability to generate statistically realistic height maps consistent with real-world geostatistics.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Unbounded, Explicit 3D Scenes Generation</h2>
+      <p>
+        By reformulating the representation for large-scale scene generation via a designed unbounded generation strategy, MetaEarth3D enables the creation of continuous, and spatially consistent 3D meshes.
+      </p>
+
+      <div class="media-wrapper">
+        <img src="static/images/unbounded.jpg" alt="Unbounded generation RGB and Depth alignment">
+      </div>
+      <p class="caption" style="max-width: 90%; margin: 1rem auto 0 auto;">
+        A representative sample demonstrating the pixel-wise alignment between the continuous, unbounded generated high-resolution RGB imagery (left) and its corresponding generated structural depth map (right).
+      </p>
+
+      <div class="video-grid">
+        <video autoplay controls muted loop playsinline preload="metadata">
+          <source src="static/videos/demo_un_1_compressed.mp4" type="video/mp4">
+        </video>
+        <video autoplay controls muted loop playsinline preload="metadata">
+          <source src="static/videos/demo_un_2_compressed.mp4" type="video/mp4">
+        </video>
+        <video autoplay controls muted loop playsinline preload="metadata">
+          <source src="static/videos/demo_un_3_compressed.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <p class="caption">Simultaneous view of diverse unbounded generation results.</p>
+    </div>
+
+    <div class="card">
+      <h2>Unlocks Interactive, Continuous Observation</h2>
+      <p>
+        Generating an unbounded and physically explicit 3D scene unlocks the capability for infinite, user-defined navigation. Throughout long-range navigation, features remain continuous across different viewpoints.
+      </p>
+
+      <div class="video-grid-2">
+        <video autoplay controls muted loop playsinline preload="metadata">
+          <source src="static/videos/demo3_1_compressed.mp4" type="video/mp4">
+        </video>
+        <video autoplay controls muted loop playsinline preload="metadata">
+          <source src="static/videos/demo3_2_compressed.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <p class="caption">Continuous navigation and observation across diverse generated 3D environments.</p>
+    </div>
+
+    <div class="card">
+      <h2>MetaEarth3D as a Generative Data Engine</h2>
+      <p>
+        MetaEarth3D generates explicit 3D meshes enriched with self-labeled native 3D annotations, making it readily amenable to deployment as a generative data engine for Earth observation and intelligent aerospace platforms.
+      </p>
+      <p>
+        We fine-tuned open-source 2D vision-language models with the synthesized dataset and tested them on real-world UAV scenes, observing an average improvement of <span class="text-gradient mono" style="font-size: 1.2rem; font-weight: bold;">+22.85%</span> across five typical geospatial understanding tasks.
+      </p>
+      <div class="media-wrapper">
+        <img src="static/images/downstream.jpg" alt="MetaEarth3D Generative Data Engine Downstream Tasks">
+      </div>
+      <p class="caption" style="text-align: justify; max-width: 90%; margin: 1rem auto 0 auto; line-height: 1.6;">
+        The bar charts (left) show a quantitative comparison of spatial reasoning performance, highlighting the consistent improvements observed in open-source models after fine-tuning on MetaEarth3D compared with their original versions (proprietary closed-source models are included for reference). The radar charts (right) illustrate a multidimensional analysis, showing significant improvements of the fine-tuned Qwen3-VL-4B over the baseline across five dimensions in both man-made and natural scenes.
+      </p>
+    </div>
+
+    <div class="card" id="BibTeX">
+      <div class="bibtex-header">
+        <h2>Citation</h2>
+        <button class="copy-btn" onclick="copyBibTeX()">
+          <i class="fas fa-copy"></i> COPY BIBTEX
+        </button>
+      </div>
+      <pre id="bibtex-code"><code>@article{YourPaperKey2026,
+  title={Spatially Scalable Generative Modeling for World-scale 3D Scenes},
+  author={Cao, Jinqi and Yu, Zhiping and Lin, Baihong and Liu, Chenyang and Shi, Zhenwei and Zou, Zhengxia},
+  journal={Conference/Journal Name},
+  year={2026},
+  url={https://your-domain.com/your-project-page}
+}</code></pre>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 MetaEarth3D Project.</p>
+    </div>
+  </footer>
+
+  <script>
+    // 1. BibTeX Copy Function
+    function copyBibTeX() {
+      const bibtexText = document.getElementById('bibtex-code').innerText;
+      navigator.clipboard.writeText(bibtexText).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.innerHTML = '<i class="fas fa-check"></i> COPIED';
+        btn.style.background = 'var(--accent-light)';
+        btn.style.color = '#fff'; // 浅色模式下，按钮背景变蓝，字需要变白
+        setTimeout(() => {
+          btn.innerHTML = '<i class="fas fa-copy"></i> COPY BIBTEX';
+          btn.style.background = 'transparent';
+          btn.style.color = 'var(--accent-light)';
+        }, 2000);
+      });
+    }
+
+    // 2. 页面滚动时自动播放/暂停（大幅节省浏览器性能）
+    document.addEventListener('DOMContentLoaded', () => {
+      const allVideos = document.querySelectorAll('video');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const video = entry.target;
+          // 如果视频在可视区域内，并且带有 autoplay 属性，则播放
+          if (entry.isIntersecting) {
+            if(video.hasAttribute('autoplay')) {
+              // 捕捉可能因为浏览器策略导致的自动播放拦截报错
+              video.play().catch(e => console.log("Autoplay paused by browser policy"));
+            }
+          } else {
+            // 移出屏幕时统统暂停，释放系统资源
+            video.pause();
+          }
+        });
+      }, { threshold: 0.3 }); // 设置为 0.3，也就是视频露出 30% 就会开始播放
+
+      allVideos.forEach(video => observer.observe(video));
+    });
+  </script>
+
+</body>
+</html>
