@@ -15,16 +15,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* Light Tech Theme Variables (淡蓝/白色底调) */
     :root {
-      --bg-color: #f4f9ff; /* 淡蓝色背景 */
-      --card-bg: rgba(255, 255, 255, 0.85); /* 半透明白卡片 */
+      --bg-color: #f4f9ff;
+      --card-bg: rgba(255, 255, 255, 0.85);
       --border-color: rgba(0, 118, 255, 0.15);
       --border-hover: rgba(0, 118, 255, 0.4);
-      --text-main: #1f2937; /* 深灰主文字 */
-      --text-muted: #6b7280; /* 中灰辅助文字 */
-      --accent-light: #0070f3; /* 亮蓝色强调 */
-      --accent-dark: #0051b3; /* 深蓝色强调 */
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --accent-light: #0070f3;
+      --accent-dark: #0051b3;
       --glow-shadow: 0 10px 30px rgba(0, 118, 255, 0.12);
     }
 
@@ -43,7 +42,6 @@
       position: relative;
     }
 
-    /* Ambient Tech Background (浅色网格 + 柔光) */
     body::before {
       content: '';
       position: fixed;
@@ -82,7 +80,6 @@
       padding: 0 24px;
     }
 
-    /* Typography */
     h1, h2, h3 {
       font-weight: 700;
       line-height: 1.2;
@@ -96,12 +93,10 @@
       color: #374151;
     }
 
-    /* 删除了原有的 JetBrains Mono 设定，保持普通字体统一 */
     .mono {
-      /* 仅保留类名以防HTML需要，但不改变字体 */
+
     }
 
-    /* Gradient Text */
     .text-gradient {
       background: linear-gradient(90deg, var(--accent-light) 0%, var(--accent-dark) 100%);
       -webkit-background-clip: text;
@@ -110,7 +105,6 @@
       text-shadow: 0 0 30px rgba(0, 118, 255, 0.15);
     }
 
-    /* Hero Section */
     .hero {
       text-align: center;
       padding: 7rem 0 4rem 0;
@@ -151,7 +145,6 @@
       color: var(--accent-light);
     }
 
-    /* Default Cyberpunk/HUD Style Cards (浅色版) */
     .card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -166,7 +159,6 @@
       overflow: hidden;
     }
 
-    /* Left accent line (HUD effect) */
     .card::before {
       content: '';
       position: absolute;
@@ -194,7 +186,6 @@
       letter-spacing: 2px;
     }
 
-    /* 从中间向两边渐变的横线 */
     .card h2::after {
       content: '';
       display: block;
@@ -205,7 +196,6 @@
       box-shadow: 0 0 10px rgba(0, 118, 255, 0.2);
     }
 
-    /* --- SPECIAL: Clean Intro Box (故事开篇风格) --- */
     .intro-card {
       background-color: rgba(255, 255, 255, 0.9);
       border: 1px solid var(--border-color);
@@ -218,7 +208,6 @@
       position: relative;
     }
 
-    /* 顶部隐约的发光线 */
     .intro-card::before {
       content: '';
       position: absolute;
@@ -238,7 +227,6 @@
       text-align: justify;
     }
 
-    /* 段落内的高亮语句 (保留此类以防以后用到，但去除了HTML中的应用) */
     .highlight-sentence {
       color: #111827;
       font-weight: 600;
@@ -247,7 +235,6 @@
       border-radius: 4px;
     }
 
-    /* Media Containers */
     .media-wrapper {
       border-radius: 12px;
       overflow: hidden;
@@ -263,7 +250,6 @@
       height: auto;
     }
 
-    /* --- Matrix Grid for 3 Videos (Unbounded Scenes) --- */
     .video-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -271,7 +257,6 @@
       margin: 2.5rem 0;
     }
 
-    /* --- Matrix Grid for 2 Videos (Multi-level & Navigation Scenes) --- */
     .video-grid-2 {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -279,7 +264,6 @@
       margin: 2.5rem 0;
     }
 
-    /* 共用的视频样式 */
     .video-grid video, .video-grid-2 video {
       width: 100%;
       border-radius: 8px;
@@ -304,7 +288,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* BibTeX Terminal Style (浅色版) */
     pre {
       background-color: #f1f5f9;
       border: 1px solid var(--border-color);
@@ -350,13 +333,11 @@
       font-size: 0.9rem;
     }
 
-    /* 移动端响应式调整 */
     @media (max-width: 768px) {
       .hero h1 { font-size: 2.2rem; }
       .card { padding: 2rem 1.5rem; }
       .intro-card { padding: 2.5rem 1.5rem; }
       .intro-card p { font-size: 1rem; }
-      /* 手机端统统折叠为单列上下排列 */
       .video-grid, .video-grid-2 {
         grid-template-columns: 1fr;
         gap: 1.5rem;
@@ -554,12 +535,12 @@
           <i class="fas fa-copy"></i> COPY BIBTEX
         </button>
       </div>
-      <pre id="bibtex-code"><code>@article{YourPaperKey2026,
-  title={Spatially Scalable Generative Modeling for World-scale 3D Scenes},
+      <pre id="bibtex-code"><code>@article{,
+  title={MetaEarth3D: Spatially Scalable Generative Modeling for World-scale 3D Scenes},
   author={Cao, Jinqi and Yu, Zhiping and Lin, Baihong and Liu, Chenyang and Shi, Zhenwei and Zou, Zhengxia},
-  journal={Conference/Journal Name},
-  year={2026},
-  url={https://your-domain.com/your-project-page}
+  journal={},
+  year={},
+  url={}
 }</code></pre>
     </div>
 
@@ -572,14 +553,13 @@
   </footer>
 
   <script>
-    // 1. BibTeX Copy Function
     function copyBibTeX() {
       const bibtexText = document.getElementById('bibtex-code').innerText;
       navigator.clipboard.writeText(bibtexText).then(() => {
         const btn = document.querySelector('.copy-btn');
         btn.innerHTML = '<i class="fas fa-check"></i> COPIED';
         btn.style.background = 'var(--accent-light)';
-        btn.style.color = '#fff'; // 浅色模式下，按钮背景变蓝，字需要变白
+        btn.style.color = '#fff';
         setTimeout(() => {
           btn.innerHTML = '<i class="fas fa-copy"></i> COPY BIBTEX';
           btn.style.background = 'transparent';
@@ -588,25 +568,21 @@
       });
     }
 
-    // 2. 页面滚动时自动播放/暂停（大幅节省浏览器性能）
     document.addEventListener('DOMContentLoaded', () => {
       const allVideos = document.querySelectorAll('video');
 
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           const video = entry.target;
-          // 如果视频在可视区域内，并且带有 autoplay 属性，则播放
           if (entry.isIntersecting) {
             if(video.hasAttribute('autoplay')) {
-              // 捕捉可能因为浏览器策略导致的自动播放拦截报错
               video.play().catch(e => console.log("Autoplay paused by browser policy"));
             }
           } else {
-            // 移出屏幕时统统暂停，释放系统资源
             video.pause();
           }
         });
-      }, { threshold: 0.3 }); // 设置为 0.3，也就是视频露出 30% 就会开始播放
+      }, { threshold: 0.3 });
 
       allVideos.forEach(video => observer.observe(video));
     });
